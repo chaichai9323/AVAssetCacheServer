@@ -662,7 +662,7 @@ static NSString *HLS_AES_KEY_MIME_TYPE = @"application/octet-stream";
     if ( mAssembled || mParser == nil ) return;
     if      ( mParser.segmentsCount != 0 ) {
         if ( mAESKeys.count != mParser.keys.count ) return;
-        if ( mSegmentNodeMap.count != mParser.segmentsCount ) return;
+        if ( mSegmentNodeMap.count != mParser.segmentsUniqueCount ) return;
         __block BOOL isAllSegmentsCached = YES;
         __block BOOL isFullyTrimmed = YES;
         [mSegmentNodeMap enumerateNodesUsingBlock:^(HLSAssetSegmentNode * _Nonnull node, BOOL * _Nonnull stop) {

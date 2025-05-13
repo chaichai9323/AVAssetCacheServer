@@ -22,6 +22,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, readonly) NSUInteger allItemsCount;
 @property (nonatomic, readonly) NSUInteger segmentsCount;
+@property (nonatomic, readonly) NSUInteger segmentsUniqueCount;
 
 @property (nonatomic, strong, readonly, nullable) NSArray<id<HLSItem>> *allItems;
 @property (nonatomic, strong, readonly, nullable) NSArray<id<HLSKey>> *keys;

@@ -779,6 +779,19 @@ static NSString *const HLS_CTX_LAST_INIT_END = @"HLS_CTX_LAST_INIT_END";
     return mSegments != nil ? mSegments.count : 0;
 }
 
+- (NSUInteger) segmentsUniqueCount {
+    if (mSegments != nil) {
+        NSMutableSet<NSString *> *set = [[NSMutableSet alloc] init];
+        for (id<HLSSegment> seg in mSegments) {
+            if (seg.URI != nil) {
+                [set addObject: seg.URI];
+            }
+        }
+        return set.count;
+    }
+    return 0;
+}
+
 - (nullable NSArray<id<HLSItem>> *)allItems {
     return mAllItems;
 }
