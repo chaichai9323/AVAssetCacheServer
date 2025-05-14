@@ -19,21 +19,18 @@ Pod::Spec.new do |s|
 #   * Write the description between the DESC delimiters below.
 #   * Finally, don't worry about the indent, CocoaPods strips it!
 
-  s.description      = 'https://github.com/changsanjiang/SJMediaCacheServer/blob/master/README.md'
+  s.description      = 'https://github.com/chaichai9323/AVAssetCacheServer/blob/master/README.md'
 
-  s.homepage         = 'https://github.com/changsanjiang/SJMediaCacheServer'
+  s.homepage         = 'https://github.com/chaichai9323/AVAssetCacheServer'
   # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
-  s.author           = { 'changsanjiang' => 'changsanjiang@gmail.com' }
-  s.source           = { :git => 'https://github.com/changsanjiang/SJMediaCacheServer.git', :tag => s.version.to_s }
+  s.author           = { 'chailintao' => 'chailintao@laien.io' }
+  s.source           = { :git => 'https://github.com/chaichai9323/AVAssetCacheServer.git', :tag => s.version.to_s }
   # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
 
   s.ios.deployment_target = '15.0'
 
-  s.source_files = 'SJMediaCacheServer/*.{h,m}', 'Interface/**/*.swift'
-  s.subspec 'Core' do |ss|
-    ss.source_files = 'SJMediaCacheServer/Core/**/*.{h,m}'
-  end
+  s.source_files = 'SJMediaCacheServer/**/*.{h,m}', 'Interface/**/*.swift'
   
   s.dependency 'SJUIKit/SQLite3'
   
@@ -41,6 +38,4 @@ Pod::Spec.new do |s|
    'SJMediaCacheServer' => ['SJMediaCacheServer/Assets/**/*']
   }
   
-
-#  s.private_header_files = 'SJMediaCacheServer/**/*.h'
 end
