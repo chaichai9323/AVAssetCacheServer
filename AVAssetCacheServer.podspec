@@ -30,13 +30,20 @@ Pod::Spec.new do |s|
 
   s.ios.deployment_target = '15.0'
 
-  s.source_files = 'SJMediaCacheServer/**/*.{h,m,swift}', 'Interface/**/*.swift'
+  s.subspec 'Cache' do |cache|
+    cache.source_files = 'SJMediaCacheServer/**/*.{h,m,swift}', 'Interface/*.swift'
+    cache.resource_bundles = {
+      'SJMediaCacheServer' => ['SJMediaCacheServer/Assets/**/*']
+    }
+    cache.dependency 'SJUIKit/SQLite3'
+  end
   
-  s.dependency 'SJUIKit/SQLite3'
+  s.subspec 'Download' do |down|
+    down.source_files = 'Interface/WorkoutDownload/**/*.swift'
+    down.dependency "Alamofire"
+    down.dependency 'AVAssetCacheServer/Cache'
+  end
   
-  s.resource_bundles = {
-   'SJMediaCacheServer' => ['SJMediaCacheServer/Assets/**/*']
-  }
   s.public_header_files = "Interface/*.h"
   s.private_header_files = "SJMediaCacheServer/**/*.h"
   s.module_map = "Interface/module.modulemap"
