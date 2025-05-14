@@ -30,12 +30,18 @@ Pod::Spec.new do |s|
 
   s.ios.deployment_target = '15.0'
 
-  s.source_files = 'SJMediaCacheServer/**/*.{h,m}', 'Interface/**/*.swift'
+  s.source_files = 'SJMediaCacheServer/**/*.{h,m,swift}', 'Interface/**/*.swift'
   
   s.dependency 'SJUIKit/SQLite3'
   
   s.resource_bundles = {
    'SJMediaCacheServer' => ['SJMediaCacheServer/Assets/**/*']
   }
-  
+  s.public_header_files = "Interface/*.h"
+  s.private_header_files = "SJMediaCacheServer/**/*.h"
+  s.module_map = "Interface/module.modulemap"
+  s.pod_target_xcconfig = {
+    'DEFINES_MODULE' => 'YES',
+    'SWIFT_INCLUDE_PATHS' => '${PODS_ROOT}/AVAssetCacheServer/SJMediaCacheServer'
+  }
 end
