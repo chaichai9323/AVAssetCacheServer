@@ -86,6 +86,14 @@ extension AVAssetCacheServer {
 }
 
 extension AVAssetCacheServer {
+    internal static func resumeDownload(
+        exp: NSObjectProtocol?
+    ) {
+        guard let export = exp as? MCSExporterProtocol else {
+            return
+        }
+        export.resume()
+    }
     
     internal static func pauseDownload(
         exp: NSObjectProtocol?

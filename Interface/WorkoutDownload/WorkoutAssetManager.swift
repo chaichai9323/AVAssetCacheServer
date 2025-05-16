@@ -44,8 +44,12 @@ public class WorkoutAssetManager {
         }
     }
     
-    public func start() {
-        currentTask?.start()
+    public func resume() {
+        if let task = currentTask {
+            task.resume()
+        } else {
+            checkDownloadTask()
+        }
     }
     
     public func pause() {

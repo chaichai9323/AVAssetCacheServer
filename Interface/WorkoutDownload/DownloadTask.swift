@@ -13,15 +13,10 @@ protocol DownloadTaskConvert {
 }
 
 extension DownloadTaskConvert {
-    var builer: DownloadTask.Builder? {
+    var builer: DownloadTask.Builder {
         let name = remoteURL.urlPathMD5
         let dir = AVAssetCacheServer.ServerConfig.offlineDir
-        let path = dir + "/\(name).\(resSuffix)"
-        if FileManager.default.fileExists(
-            atPath: path
-        ) {
-            return nil
-        }        
+        let path = dir + "/\(name).\(resSuffix)"       
         return .init(remote: remoteURL, local: path)
     }
 }
@@ -33,7 +28,12 @@ class DownloadTask {
         let remote: String
         let local: String
         
-        var task: DownloadTask {
+        var task: DownloadTask? {
+            if FileManager.default.fileExists(
+                atPath: local
+            ) {
+                return nil
+            }
             return .init(url: remote, localPath: local)
         }
     }
@@ -58,9 +58,13 @@ class DownloadTask {
 #endif
     }
     
-    private func download(
+    func cancel() {
+        request?.cancel()
+    }
+    
+    func start(
         progress: ((Double) -> Void)?,
-        completion: ((Error?) -> Void)?
+        completion: ((AFError?) -> Void)?
     ) {
         let dst = URL(fileURLWithPath: localPath)
         self.request = AF.download(
@@ -88,23 +92,6 @@ class DownloadTask {
             } else {
                 progress?(1.0)
                 completion?(nil)
-            }
-        }
-    }
-
-    @discardableResult
-    func start(
-        progress: ((Double) -> Void)?
-    ) async throws -> Bool {
-        return try await withCheckedThrowingContinuation { config in
-            download(
-                progress: progress
-            ) { err in
-                if let e = err {
-                    config.resume(throwing: e)
-                } else {
-                    config.resume(returning: true)
-                }
             }
         }
     }

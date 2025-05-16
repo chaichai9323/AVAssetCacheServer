@@ -24,16 +24,24 @@ class WorkoutAssetDownloader {
     private let asset: WorkoutAsset
     
     private var queue: [DownloadTask] = []
+    private var totalTaskCount: Int = 0
+    private var finishTaskCount: Int = 0
     
     private var audioProgress: Double = 0.0 {
         didSet {
             state = .downloading(p: progress)
+#if DEBUG
+            print("audio下载进度：%\(Int(audioProgress * 100.0))")
+#endif
         }
     }
     
     private var videoProgress: Double = 0.0 {
         didSet {
             state = .downloading(p: progress)
+#if DEBUG
+            print("video下载进度：%\(Int(videoProgress * 100.0))")
+#endif
         }
     }
     
@@ -59,10 +67,12 @@ class WorkoutAssetDownloader {
         return v + a
     }
     
+    private var isPaused = false
+    
     @Published
     var state: WorkoutAssetDownloadState = .notDownload
     
-    private var audioTask: Task<(), Never>?
+    private var audioTask: DownloadTask?
     private var videoTask: NSObjectProtocol?
     
     init(asset: WorkoutAsset) {
@@ -70,8 +80,17 @@ class WorkoutAssetDownloader {
     }
     
     func pause() {
-        audioTask?.cancel()
+        isPaused = true
+        stopDownloadAudio()
         AVAssetCacheServer.pauseDownload(
+            exp: videoTask
+        )
+    }
+    
+    func resume() {
+        isPaused = false
+        startDownloadAudio()
+        AVAssetCacheServer.resumeDownload(
             exp: videoTask
         )
     }
@@ -86,10 +105,16 @@ class WorkoutAssetDownloader {
             return
         }
         
-        audioTask = Task { @MainActor [weak self] in
+        let ast = asset
+        Task { @MainActor [weak self] in
             do {
-                try await self?.downloadAudios()
-                self?.audioFinish = true
+                let (list, complete) = try await Self.prepareDownloadFiles(
+                    asset: ast
+                )
+                self?.queue = list
+                self?.totalTaskCount = list.count + complete
+                self?.finishTaskCount = complete
+                self?.startDownloadAudio()
             } catch {
                 self?.state = .download(error: error)
                 AVAssetCacheServer.cancelDownload(
@@ -108,38 +133,55 @@ class WorkoutAssetDownloader {
             } else {
                 self?.state =
                     .download(error: NetworkRequest.ErrorCode.videoDownloadError)
-                self?.audioTask?.cancel()
+                self?.stopDownloadAudio()
             }
         }
         state = .downloading(p: 0)
     }
     
-    @MainActor
-    private func downloadAudios(
-        
-    ) async throws {
-        let list = try await prepareDownloadFiles()
-        let arr = list.compactMap { $0.builer }
-        let queue = Set(arr).map{ $0.task }
-        self.queue = queue
-        let total = Double(queue.count)
-        var finish: Double = 0.0
-        
-        for task in queue {
-            try await task.start { [weak self] p in
-                let percent = (finish + p) / total
-                self?.audioProgress = percent
+    private func startDownloadAudio() {
+        guard queue.count > 0,
+              totalTaskCount > 0 else {
+            if !audioFinish {
+                audioFinish = true
             }
-            finish += 1.0
+            return
         }
+        guard let task = queue.first else {
+            return
+        }
+        audioTask = task
+        
+        let t = Double(totalTaskCount)
+        let a = Double(finishTaskCount)
+        task.start { [weak self] p in
+            self?.audioProgress = (p + a) / t
+        } completion: { [weak self] err in
+            if let e = err {
+                if self?.isPaused != true {
+                    self?.state = .download(error: e)
+                    AVAssetCacheServer.cancelDownload(
+                        exp: self?.videoTask
+                    )
+                }
+            } else {
+                self?.finishTaskCount += 1
+                self?.queue.removeFirst()
+                self?.startDownloadAudio()
+            }
+        }
+    }
+    
+    private func stopDownloadAudio() {
+        audioTask?.cancel()
     }
 }
 
 extension WorkoutAssetDownloader {
     
-    private func prepareDownloadFiles(
-        
-    ) async throws -> [DownloadTaskConvert] {
+    private static func prepareDownloadFiles(
+        asset: WorkoutAsset
+    ) async throws -> ([DownloadTask], Int) {
         let id = asset.id
         let list = try await NetworkRequest.request(
             audioJson: asset.audioJsonUrl,
@@ -175,6 +217,11 @@ extension WorkoutAssetDownloader {
             completeSound = []
         }
         
-        return list + sound + welcomSound + completeSound
+        let taskList = list + sound + welcomSound + completeSound
+        let arr = taskList.map { $0.builer }
+        let total = Array(Set(arr))
+        let queue = total.compactMap { $0.task }
+        let finishCount = total.count - queue.count
+        return (queue, finishCount)
     }
 }
