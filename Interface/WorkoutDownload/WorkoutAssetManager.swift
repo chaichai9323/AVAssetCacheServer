@@ -86,6 +86,40 @@ public class WorkoutAssetManager {
         
         checkDownloadTask()
     }
+    /// 删除下载的资源
+    public func deleteAssert(_ item: WorkoutAsset) {
+        guard let index = downloadList.firstIndex(
+            of: item
+        ) else {
+            return
+        }
+        
+        if let tsk = currentTask,
+           tsk.asset == item {
+            tsk.pause()
+            disBag.forEach{ $0.cancel() }
+            disBag = []
+            currentTask = nil
+        }
+        
+        downloadList.remove(at: index)
+        downloadMap[item.id] = nil
+        downloadQueue.removeAll { $0 == item }
+        
+        if let data = try? JSONEncoder().encode(
+            downloadList
+        ) {
+            try? data.write(to: fileURL)
+        }
+        let fileM = FileManager.default
+        for path in item.localFilePaths {
+            if fileM.fileExists(atPath: path) {
+                try? FileManager.default.removeItem(
+                    atPath: path
+                )
+            }
+        }
+    }
     
     private func checkDownloadTask() {
         guard currentTask == nil else {

@@ -76,7 +76,9 @@ struct NetworkRequest {
         url: String
     ) async throws -> Data {
         try await withCheckedThrowingContinuation { config in
-            AF.request(url).response { resp in
+            AF.request(url) { req in
+                req.timeoutInterval = 10.0
+            }.response { resp in
                 if let data = resp.data,
                    resp.error == nil {
                     config.resume(returning: data)

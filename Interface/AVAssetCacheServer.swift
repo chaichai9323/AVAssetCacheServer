@@ -20,7 +20,6 @@ public class AVAssetCacheServer {
     init() {
 #if DEBUG
         SJMediaCacheServer.shared().isEnabledConsoleLog = true
-        SJMediaCacheServer.shared().removeAllCaches()
 #endif
     }
     

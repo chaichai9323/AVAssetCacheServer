@@ -166,6 +166,15 @@ extension WorkoutAsset {
         return Self.parentDir + "/" + modelName
     }
     
+    internal var localFilePaths: [String] {
+        return [
+            localModelPath,
+            NetworkRequest.audioPath(id: id),
+            NetworkRequest.soundPath(id: id),
+            NetworkRequest.welcomSoundPath(id: id),
+            NetworkRequest.completeSoundPath(id: id)
+        ]
+    }
     private func getAudioSoundList<T: Codable>(
         _ type: T.Type,
         path: String,

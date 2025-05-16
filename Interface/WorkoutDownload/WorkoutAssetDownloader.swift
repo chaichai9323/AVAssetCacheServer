@@ -21,7 +21,7 @@ class WorkoutAssetDownloader {
         return asset.id
     }
     
-    private let asset: WorkoutAsset
+    let asset: WorkoutAsset
     
     private var queue: [DownloadTask] = []
     private var totalTaskCount: Int = 0
