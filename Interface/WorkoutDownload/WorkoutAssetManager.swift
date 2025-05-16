@@ -37,7 +37,7 @@ public class WorkoutAssetManager {
             downloadList = list
             for asset in list {
                 downloadMap[asset.id] = asset
-                if !asset.isFinished {
+                if !asset.isDownloaded {
                     downloadQueue.append(asset)
                 }
             }

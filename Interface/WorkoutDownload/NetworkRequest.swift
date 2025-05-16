@@ -9,19 +9,38 @@ import Foundation
 import Alamofire
 
 struct NetworkRequest {
+    
+    static func audioPath(id: String) -> String {
+        return dir + "/\(id)_audio.json"
+    }
+    
+    static func soundPath(id: String) -> String {
+        return dir + "/\(id)_sound.json"
+    }
+    
+    static func welcomSoundPath(id: String) -> String {
+        return dir + "/\(id)_welcomSound.json"
+    }
+    
+    static func completeSoundPath(id: String) -> String {
+        return dir + "/\(id)_completeSound.json"
+    }
+    
     enum ErrorCode: Error {
         case unknown
         case fileDownloadError
         case videoDownloadError
     }
     
-    private struct RespSoundModel: Codable {
+    struct WrapperListModel<T: Codable>: Codable {
         let code: Int
 
         let message: String?
 
-        let data: [SoundModel]
+        let data: [T]
     }
+    
+    private typealias RespSoundModel = WrapperListModel<SoundModel>
     
     private struct SoundModel: Codable, DownloadTaskConvert {
 
@@ -98,7 +117,7 @@ struct NetworkRequest {
         audioJson url: String,
         id: String
     ) async throws -> [DownloadTaskConvert] {
-        let path = dir + "/\(id)_audio.json"
+        let path = audioPath(id: id)
         if let cache = cachedJson(
             [AudioModel].self,
             path: path
@@ -118,7 +137,7 @@ struct NetworkRequest {
         sound url: String,
         id: String
     ) async throws -> [DownloadTaskConvert] {
-        let path = dir + "/\(id)_sound.json"
+        let path = soundPath(id: id)
         if let cache = cachedJson(
             RespSoundModel.self,
             path: path
@@ -141,7 +160,7 @@ struct NetworkRequest {
         welcomSound url: String,
         id: String
     ) async throws -> [DownloadTaskConvert] {
-        let path = dir + "/\(id)_welcomSound.json"
+        let path = welcomSoundPath(id: id)
         if let cache = cachedJson(
             RespSoundModel.self,
             path: path
@@ -164,7 +183,7 @@ struct NetworkRequest {
         completeSound url: String,
         id: String
     ) async throws -> [DownloadTaskConvert] {
-        let path = dir + "/\(id)_completeSound.json"
+        let path = completeSoundPath(id: id)
         if let cache = cachedJson(
             RespSoundModel.self,
             path: path
