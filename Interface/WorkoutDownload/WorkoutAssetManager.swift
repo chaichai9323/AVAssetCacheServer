@@ -119,6 +119,12 @@ public class WorkoutAssetManager {
                 )
             }
         }
+        
+        if let url = URL(string: item.videoUrl) {
+            AVAssetCacheServer.deleteDownload(
+                url: url
+            )
+        }
     }
     
     private func checkDownloadTask() {

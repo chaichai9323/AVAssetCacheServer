@@ -12,24 +12,20 @@ public enum AVAssetCacheError: Error {
     case invalidURL
 }
 
-@MainActor
-public class AVAssetCacheServer {
-    
-    public static let shared = AVAssetCacheServer()
-    
-    init() {
-#if DEBUG
-        SJMediaCacheServer.shared().isEnabledConsoleLog = true
-#endif
+public final class AVAssetCacheServer {
+    /// 是否允许打印日志
+    public static var logEnabled: Bool {
+        get {
+            SJMediaCacheServer.shared().isEnabledConsoleLog
+        }
+        
+        set {
+            SJMediaCacheServer.shared().isEnabledConsoleLog = newValue
+        }
     }
     
-    
-}
-
-/// 边下边播
-public extension AVAssetCacheServer {
     /// 最大缓存过期时间
-    var cacheMaxDiskAge: TimeInterval {
+    public static var cacheMaxDiskAge: TimeInterval {
         get {
             return SJMediaCacheServer.shared().cacheMaxDiskAge
         }
@@ -37,20 +33,24 @@ public extension AVAssetCacheServer {
             SJMediaCacheServer.shared().cacheMaxDiskAge = newValue
         }
     }
+}
+
+/// 边下边播
+public extension AVAssetCacheServer {
     
-    func startRedirect(
+    static func cache(
         url: URL,
         progress: ((Float) -> Void)?
     ) async throws -> URL {
         try await withCheckedThrowingContinuation { config in
-            Self.prefetch(
+            prefetch(
                 url: url,
                 progress: progress
             ) { err in
                 if let e = err {
                     config.resume(throwing: e)
                 } else {
-                    if let res = Self.redirect(url: url) {
+                    if let res = redirect(url: url) {
                         config.resume(returning: res)
                     } else {
                         config.resume(throwing: AVAssetCacheError.invalidURL)
@@ -81,60 +81,5 @@ extension AVAssetCacheServer {
         return SJMediaCacheServer.shared().proxyURL(
             from: url
         )
-    }
-}
-
-extension AVAssetCacheServer {
-    internal static func resumeDownload(
-        exp: NSObjectProtocol?
-    ) {
-        guard let export = exp as? MCSExporterProtocol else {
-            return
-        }
-        export.resume()
-    }
-    
-    internal static func pauseDownload(
-        exp: NSObjectProtocol?
-    ) {
-        guard let export = exp as? MCSExporterProtocol else {
-            return
-        }
-        export.suspend()
-    }
-    
-    internal static func cancelDownload(
-        exp: NSObjectProtocol?
-    ) {
-        guard let export = exp as? MCSExporterProtocol else {
-            return
-        }
-        export.cancel()
-    }
-    
-    internal static func download(
-        url: URL,
-        progress: ((Float) -> Void)?,
-        completion: ((Bool) -> Void)?
-    ) -> NSObjectProtocol? {
-        let exp = SJMediaCacheServer.shared().exportAsset(
-            with: url,
-            shouldResume: true
-        )
-        if exp?.status == .finished {
-            completion?(true)
-            return exp
-        }
-        exp?.progressDidChangeExecuteBlock = { p in
-            progress?(p.progress)
-        }
-        exp?.statusDidChangeExecuteBlock = { p in
-            if p.status == .failed {
-                completion?(false)
-            } else if p.status == .finished {
-                completion?(true)
-            }
-        }
-        return exp
     }
 }
