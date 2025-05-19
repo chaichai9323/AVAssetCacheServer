@@ -7,7 +7,7 @@
 //
 
 #import "MCSLogger.h"
-#import <SJUIKit/SJSQLite3Logger.h>
+#import "SJSQLite3Logger.h"
 #import <stdarg.h>
 
 @implementation MCSLogger

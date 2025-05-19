@@ -143,6 +143,7 @@ class WorkoutAssetDownloader {
         guard queue.count > 0,
               totalTaskCount > 0 else {
             if !audioFinish {
+                audioProgress = 1.0
                 audioFinish = true
             }
             return

@@ -31,11 +31,11 @@ Pod::Spec.new do |s|
   s.ios.deployment_target = '15.0'
 
   s.subspec 'Cache' do |cache|
-    cache.source_files = 'SJMediaCacheServer/**/*.{h,m,swift}', 'Interface/*.swift'
+    cache.source_files = 'SJMediaCacheServer/**/*.{h,m,swift}', 'SQLite3/**/*.{h,m}', 'Interface/*.swift'
     cache.resource_bundles = {
       'SJMediaCacheServer' => ['SJMediaCacheServer/Assets/**/*']
     }
-    cache.dependency 'SJUIKit/SQLite3'
+    cache.dependency 'YYModel'
   end
   
   s.subspec 'Download' do |down|
