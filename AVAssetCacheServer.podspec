@@ -31,7 +31,7 @@ Pod::Spec.new do |s|
   s.ios.deployment_target = '15.0'
 
   s.subspec 'Cache' do |cache|
-    cache.source_files = 'SJMediaCacheServer/**/*.{h,m,swift}', 'SQLite3/**/*.{h,m}', 'Interface/*.swift'
+    cache.source_files = 'SJMediaCacheServer/**/*.{h,m,swift}', 'SQLite3/**/*.{h,m}', 'Interface/AVAssetCacheServer.swift'
     cache.resource_bundles = {
       'SJMediaCacheServer' => ['SJMediaCacheServer/Assets/**/*']
     }
@@ -51,4 +51,5 @@ Pod::Spec.new do |s|
     'DEFINES_MODULE' => 'YES',
     'SWIFT_INCLUDE_PATHS' => '${PODS_ROOT}/AVAssetCacheServer/SJMediaCacheServer'
   }
+  s.default_subspec = 'Cache'
 end

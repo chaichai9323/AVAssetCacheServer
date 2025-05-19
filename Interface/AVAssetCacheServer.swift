@@ -33,47 +33,41 @@ public final class AVAssetCacheServer {
             SJMediaCacheServer.shared().cacheMaxDiskAge = newValue
         }
     }
+    
+    public typealias CacheResult = Result<URL, Error>
+    
+    private static var completeHandle: ((CacheResult) -> Void)?
 }
 
 /// 边下边播
-public extension AVAssetCacheServer {
-    
-    static func cache(
-        url: URL,
-        progress: ((Float) -> Void)?
-    ) async throws -> URL {
-        try await withCheckedThrowingContinuation { config in
-            prefetch(
-                url: url,
-                progress: progress
-            ) { err in
-                if let e = err {
-                    config.resume(throwing: e)
-                } else {
-                    if let res = redirect(url: url) {
-                        config.resume(returning: res)
-                    } else {
-                        config.resume(throwing: AVAssetCacheError.invalidURL)
-                    }
-                }
-            }
-        }
-    }
-}
-
-// MARK: - 预加载
 extension AVAssetCacheServer {
-    private static func prefetch(
+    
+    public static func cancelCache() {
+        completeHandle = nil
+        SJMediaCacheServer.shared().cancelAllPrefetchTasks()
+    }
+    
+    public static func cache(
         url: URL,
         progress: ((Float) -> Void)?,
-        completion: ((Error?) -> Void)?
+        completion: ((CacheResult) -> Void)?
     ) {
+        completeHandle = completion
         SJMediaCacheServer.shared().prefetch(
             with: url,
             prefetchFileCount: 1,
-            progress: progress,
-            completion: completion
-        )
+            progress: progress
+        ) { err in
+            if let e = err {
+                AVAssetCacheServer.completeHandle?(.failure(e))
+            } else if let res = AVAssetCacheServer.redirect(url: url) {
+                AVAssetCacheServer.completeHandle?(.success(res))
+            } else {
+                AVAssetCacheServer.completeHandle?(
+                    .failure(AVAssetCacheError.invalidURL)
+                )
+            }
+        }
     }
     
     /// Convert the original URL to a proxy URL
