@@ -6,7 +6,6 @@
 //
 
 import Foundation
-@_implementationOnly import AVAssetCacheServer.Internal
 
 public enum AVAssetCacheError: Error {
     case invalidURL
