@@ -57,15 +57,16 @@ extension AVAssetCacheServer {
             prefetchFileCount: 1,
             progress: progress
         ) { err in
-            if let e = err {
-                AVAssetCacheServer.completeHandle?(.failure(e))
-            } else if let res = AVAssetCacheServer.redirect(url: url) {
-                AVAssetCacheServer.completeHandle?(.success(res))
+            let res: CacheResult
+            if err == nil,
+               let local = AVAssetCacheServer.redirect(
+                url: url
+               ) {
+                res = .success(local)
             } else {
-                AVAssetCacheServer.completeHandle?(
-                    .failure(AVAssetCacheError.invalidURL)
-                )
+                res = .failure(err ?? AVAssetCacheError.invalidURL)
             }
+            AVAssetCacheServer.completeHandle?(res)
         }
     }
     
