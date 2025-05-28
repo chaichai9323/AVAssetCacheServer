@@ -33,6 +33,10 @@
     return obj;
 }
 
+- (void)stop {
+    [_server stop];
+}
+
 - (instancetype)init {
     self = [super init];
     if ( self ) {

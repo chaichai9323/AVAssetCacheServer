@@ -44,6 +44,7 @@ extension AVAssetCacheServer {
     public static func cancelCache() {
         completeHandle = nil
         SJMediaCacheServer.shared().cancelAllPrefetchTasks()
+        SJMediaCacheServer.shared().stop()
     }
     
     public static func cache(

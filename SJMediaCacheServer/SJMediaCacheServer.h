@@ -19,6 +19,8 @@ NS_ASSUME_NONNULL_BEGIN
 @interface SJMediaCacheServer : NSObject
 + (instancetype)shared;
 
+- (void)stop;
+
 /// Convert the given URL to a proxy playback URL.
 ///
 /// This method takes an original media asset URL and converts it to a local proxy server URL.
