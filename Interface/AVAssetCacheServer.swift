@@ -41,6 +41,13 @@ public final class AVAssetCacheServer {
 /// 边下边播
 extension AVAssetCacheServer {
     
+    public static func reloadServer(
+        url: URL
+    ) -> URL? {
+        SJMediaCacheServer.shared().stop()
+        return redirect(url: url)
+    }
+    
     public static func cancelCache() {
         completeHandle = nil
         SJMediaCacheServer.shared().cancelAllPrefetchTasks()
