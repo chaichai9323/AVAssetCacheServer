@@ -34,19 +34,24 @@
 }
 
 - (void)stop {
-    [_server stop];
+    [self reloadServer];
+}
+
+- (void)reloadServer {
+    _server = [MCTcpSocketServer.alloc init];
+    _server.onConnect = ^(MCTcpSocketConnection * _Nonnull connection) {
+        [MCHttpResponse processConnection:connection];
+    };
+    _server.onListen = ^(uint16_t port) {
+        MCSURL.shared.serverURL = [NSURL URLWithString:[NSString stringWithFormat:@"http://127.0.0.1:%hu", port]];
+    };
 }
 
 - (instancetype)init {
     self = [super init];
     if ( self ) {
-        _server = [MCTcpSocketServer.alloc init];
-        _server.onConnect = ^(MCTcpSocketConnection * _Nonnull connection) {
-            [MCHttpResponse processConnection:connection];
-        };
-        _server.onListen = ^(uint16_t port) {
-            MCSURL.shared.serverURL = [NSURL URLWithString:[NSString stringWithFormat:@"http://127.0.0.1:%hu", port]];
-        };
+        
+        [self reloadServer];
         
         self.resolveAssetIdentifier = ^NSString * _Nonnull(NSURL * _Nonnull URL) {
             NSURLComponents *components = [NSURLComponents componentsWithURL:URL resolvingAgainstBaseURL:NO];
